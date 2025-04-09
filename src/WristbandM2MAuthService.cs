@@ -101,10 +101,23 @@ public class WristbandM2MAuthService : IWristbandM2MAuthService
         // Cancel the token source
         _cts.Cancel();
 
-        // If the background task was created, wait for it to complete
-        if (_backgroundRefreshTask != null)
+        try
         {
-            _backgroundRefreshTask.Wait();
+            // If the background task was created, wait for it to complete
+            _backgroundRefreshTask?.Wait();
+        }
+        catch (AggregateException ex)
+        {
+            // Handle the exception if it's TaskCanceledException or OperationCanceledException
+            if (ex.InnerExceptions.Any(innerEx => innerEx is TaskCanceledException || innerEx is OperationCanceledException))
+            {
+                // This can happen due to Dispose cancellation, but it's expected.
+            }
+            else
+            {
+                // Rethrow if it's some other exception.
+                throw;
+            }
         }
 
         // Clean up any other resources if necessary
