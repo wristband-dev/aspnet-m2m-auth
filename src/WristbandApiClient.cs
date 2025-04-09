@@ -1,4 +1,3 @@
-using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
@@ -8,10 +7,8 @@ using Microsoft.Extensions.Options;
 
 namespace Wristband.AspNet.Auth.M2M;
 
-/// <summary>
-/// Factory for creating and configuring HTTP clients for Wristband authentication.
-/// </summary>
-internal class WristbandM2MAuthClient : IWristbandM2MAuthClient
+/// <inheritdoc cref="IWristbandApiClient" />
+internal class WristbandApiClient : IWristbandApiClient
 {
     // Default timeout for HTTP requests in seconds
     private const int DefaultTimeoutSeconds = 30;
@@ -31,13 +28,13 @@ internal class WristbandM2MAuthClient : IWristbandM2MAuthClient
     private readonly HttpClient _httpClient;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="WristbandM2MAuthClient"/> class.
+    /// Initializes a new instance of the <see cref="WristbandApiClient"/> class.
     /// </summary>
     /// <param name="options">The options for configuring the client.</param>
     /// <param name="externalFactory">Optional external HTTP client factory. If not provided, an internal factory will be used.</param>
     /// <exception cref="ArgumentNullException">Thrown when options is null.</exception>
     /// <exception cref="ArgumentException">Thrown when required options are missing or invalid.</exception>
-    internal WristbandM2MAuthClient(IOptions<WristbandM2MAuthOptions> options, IHttpClientFactory? externalFactory = null)
+    internal WristbandApiClient(IOptions<WristbandM2MAuthOptions> options, IHttpClientFactory? externalFactory = null)
     {
         if (options == null)
         {

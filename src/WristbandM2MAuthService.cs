@@ -16,7 +16,7 @@ public class WristbandM2MAuthService : IWristbandM2MAuthService
     private const int RetryDelayMs = 100;
 
     // HTTP client for making requests to Wristband.
-    private readonly IWristbandM2MAuthClient _authClient;
+    private readonly IWristbandApiClient _wristbandApiClient;
 
     // Semaphore to prevent concurrent token refresh operations.
     private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
@@ -62,8 +62,8 @@ public class WristbandM2MAuthService : IWristbandM2MAuthService
 
         _tokenExpiryBuffer = optionsValue.TokenExpiryBuffer;
 
-        // Create a token client using the factory - validation happens inside the factory
-        _authClient = new WristbandM2MAuthClient(options, httpClientFactory);
+        // Create a client using the factory - validation happens inside the factory
+        _wristbandApiClient = new WristbandApiClient(options, httpClientFactory);
 
         // If a valid BackgroundTokenRefreshInterval is provided, start the background refresh loop.
         if (optionsValue.BackgroundTokenRefreshInterval.HasValue)
@@ -155,7 +155,7 @@ public class WristbandM2MAuthService : IWristbandM2MAuthService
             {
                 try
                 {
-                    var tokenResponse = await _authClient.GetM2MToken();
+                    var tokenResponse = await _wristbandApiClient.GetM2MToken();
 
                     // Cache the token and set expiry based on configured buffer
                     var buffer = tokenResponse.ExpiresIn <= _tokenExpiryBuffer.TotalSeconds ? TimeSpan.FromMinutes(1) : _tokenExpiryBuffer;
@@ -173,14 +173,9 @@ public class WristbandM2MAuthService : IWristbandM2MAuthService
 
                     await Task.Delay(RetryDelayMs);
                 }
-                catch (HttpRequestException ex) when (ex.StatusCode >= HttpStatusCode.BadRequest && ex.StatusCode < HttpStatusCode.InternalServerError)
-                {
-                    // Don't retry for 4xx client errors
-                    throw;
-                }
                 catch
                 {
-                    // Don't retry for unexpected error
+                    // Don't retry for any other type of error
                     throw;
                 }
             }

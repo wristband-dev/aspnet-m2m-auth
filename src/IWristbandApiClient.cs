@@ -1,9 +1,9 @@
 namespace Wristband.AspNet.Auth.M2M;
 
 /// <summary>
-/// Interface for functionality around making REST API calls to the Wristband platform.
+/// Interface for handling REST API requests to the Wristband platform.
 /// </summary>
-internal interface IWristbandM2MAuthClient
+internal interface IWristbandApiClient
 {
     /// <summary>
     /// Calls the Wristband Token Endpoint with the client credentials grant type to get an access token.

@@ -62,7 +62,7 @@ public class WristbandM2MAuthServiceTests
     public async Task GetTokenAsync_CallsTokenClient_GetM2MToken_AndCachesToken()
     {
         // Mock the client
-        var mockClient = new Mock<IWristbandM2MAuthClient>();
+        var mockClient = new Mock<IWristbandApiClient>();
         mockClient
             .Setup(c => c.GetM2MToken())
             .ReturnsAsync(new TokenResponse
@@ -75,7 +75,7 @@ public class WristbandM2MAuthServiceTests
 
         // Use reflection to inject the mock client
         var clientField = typeof(WristbandM2MAuthService)
-            .GetField("_authClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            .GetField("_wristbandApiClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         clientField?.SetValue(service, mockClient.Object);
         var semaphoreField = typeof(WristbandM2MAuthService)
             .GetField("_semaphore", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -93,7 +93,7 @@ public class WristbandM2MAuthServiceTests
     public async Task GetTokenAsync_ReturnsCachedToken_WhenTokenIsAlreadyValid()
     {
         var options = CreateValidOptions();
-        var mockClient = new Mock<IWristbandM2MAuthClient>();
+        var mockClient = new Mock<IWristbandApiClient>();
         var service = new WristbandM2MAuthService(options);
 
         // Use reflection to set a valid cached token
@@ -110,7 +110,7 @@ public class WristbandM2MAuthServiceTests
 
         // Use reflection to inject the mock client
         var clientField = typeof(WristbandM2MAuthService)
-            .GetField("_authClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            .GetField("_wristbandApiClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         clientField?.SetValue(service, mockClient.Object);
 
         var token = await service.GetTokenAsync();
@@ -147,7 +147,7 @@ public class WristbandM2MAuthServiceTests
     public async Task GetTokenAsync_RetriesOnServerError()
     {
         // Setup to throw server errors on first two attempts, then succeed
-        var mockClient = new Mock<IWristbandM2MAuthClient>();
+        var mockClient = new Mock<IWristbandApiClient>();
         mockClient
             .SetupSequence(c => c.GetM2MToken())
             .ThrowsAsync(new HttpRequestException("Server Error 1", null, HttpStatusCode.InternalServerError))
@@ -162,7 +162,7 @@ public class WristbandM2MAuthServiceTests
 
         // Use reflection to inject the mock client
         var clientField = typeof(WristbandM2MAuthService)
-            .GetField("_authClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            .GetField("_wristbandApiClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         clientField?.SetValue(service, mockClient.Object);
         var semaphoreField = typeof(WristbandM2MAuthService)
             .GetField("_semaphore", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -178,7 +178,7 @@ public class WristbandM2MAuthServiceTests
     [Fact]
     public async Task GetTokenAsync_ThrowsOnClientError()
     {
-        var mockClient = new Mock<IWristbandM2MAuthClient>();
+        var mockClient = new Mock<IWristbandApiClient>();
         mockClient
             .Setup(c => c.GetM2MToken())
             .ThrowsAsync(new HttpRequestException("Bad Request", null, HttpStatusCode.BadRequest));
@@ -186,7 +186,7 @@ public class WristbandM2MAuthServiceTests
 
         // Use reflection to inject the mock client
         var clientField = typeof(WristbandM2MAuthService)
-            .GetField("_authClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            .GetField("_wristbandApiClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         clientField?.SetValue(service, mockClient.Object);
         var semaphoreField = typeof(WristbandM2MAuthService)
             .GetField("_semaphore", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);

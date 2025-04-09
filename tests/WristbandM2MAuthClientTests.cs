@@ -8,7 +8,7 @@ using Moq.Protected;
 
 namespace Wristband.AspNet.Auth.M2M.Tests;
 
-public class WristbandM2MAuthClientTests
+public class WristbandApiClientTests
 {
     private IOptions<WristbandM2MAuthOptions> CreateValidOptions()
     {
@@ -23,7 +23,7 @@ public class WristbandM2MAuthClientTests
     [Fact]
     public void Constructor_ThrowsArgumentNullException_WhenOptionsIsNull()
     {
-        Assert.Throws<ArgumentNullException>(() => new WristbandM2MAuthClient(null!));
+        Assert.Throws<ArgumentNullException>(() => new WristbandApiClient(null!));
     }
 
     [Fact]
@@ -33,8 +33,7 @@ public class WristbandM2MAuthClientTests
         var mockOptions = new Mock<IOptions<WristbandM2MAuthOptions>>();
         mockOptions.Setup(o => o.Value).Returns((WristbandM2MAuthOptions)null!);
 
-        Assert.Throws<ArgumentNullException>(() =>
-            new WristbandM2MAuthClient(mockOptions.Object, null));
+        Assert.Throws<ArgumentNullException>(() => new WristbandApiClient(mockOptions.Object, null));
     }
 
     [Theory]
@@ -51,8 +50,7 @@ public class WristbandM2MAuthClientTests
             ClientSecret = clientSecret
         });
 
-        var ex = Assert.Throws<ArgumentException>(() =>
-            new WristbandM2MAuthClient(options));
+        var ex = Assert.Throws<ArgumentException>(() => new WristbandApiClient(options));
 
         Assert.Contains(expectedParamName, ex.Message);
     }
@@ -68,10 +66,10 @@ public class WristbandM2MAuthClientTests
             .Setup(f => f.CreateClient(It.IsAny<string>()))
             .Returns(mockHttpClient.Object);
 
-        var client = new WristbandM2MAuthClient(options, mockFactory.Object);
+        var client = new WristbandApiClient(options, mockFactory.Object);
 
         // Use reflection to get the HttpClient
-        var httpClientField = typeof(WristbandM2MAuthClient)
+        var httpClientField = typeof(WristbandApiClient)
             .GetField("_httpClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         var httpClient = httpClientField?.GetValue(client) as HttpClient;
 
@@ -89,10 +87,10 @@ public class WristbandM2MAuthClientTests
             .Setup(f => f.CreateClient(It.IsAny<string>()))
             .Returns(mockHttpClient.Object);
 
-        var client = new WristbandM2MAuthClient(options, mockFactory.Object);
+        var client = new WristbandApiClient(options, mockFactory.Object);
 
         // Use reflection to get the HttpClient
-        var httpClientField = typeof(WristbandM2MAuthClient)
+        var httpClientField = typeof(WristbandApiClient)
             .GetField("_httpClient", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         var httpClient = httpClientField?.GetValue(client) as HttpClient;
 
@@ -142,7 +140,7 @@ public class WristbandM2MAuthClientTests
             .Setup(f => f.CreateClient(It.IsAny<string>()))
             .Returns(httpClient);
 
-        var client = new WristbandM2MAuthClient(options, mockFactory.Object);
+        var client = new WristbandApiClient(options, mockFactory.Object);
         var tokenResponse = await client.GetM2MToken();
 
         Assert.Equal("test-token", tokenResponse.AccessToken);
@@ -190,7 +188,7 @@ public class WristbandM2MAuthClientTests
             .Setup(f => f.CreateClient(It.IsAny<string>()))
             .Returns(httpClient);
 
-        var client = new WristbandM2MAuthClient(options, mockFactory.Object);
+        var client = new WristbandApiClient(options, mockFactory.Object);
 
         await Assert.ThrowsAsync<System.Text.Json.JsonException>(() => client.GetM2MToken());
     }
@@ -199,7 +197,7 @@ public class WristbandM2MAuthClientTests
     public void CreateInternalFactory_ReturnsConfiguredHttpClientFactory()
     {
         // Use reflection to call the private static method
-        var method = typeof(WristbandM2MAuthClient)
+        var method = typeof(WristbandApiClient)
             .GetMethod("CreateInternalFactory", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
 
         var factory = method?.Invoke(null, null) as IHttpClientFactory;
